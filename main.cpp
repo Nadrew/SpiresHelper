@@ -29,16 +29,20 @@ namespace SpiresHelper {
 			boost::filesystem::create_directories(dir);
 		}
 		ofstream *handler;
-		if (file_handlers.find(log_path) != file_handlers.end()) {
-			handler = file_handlers[log_path];
+
+		std::map<std::string, ofstream*>::iterator it;
+		it = file_handlers.find(log_path);
+
+		if (it != file_handlers.end()) {
+			handler = it->second;
 		}
 		else {
-			handler = new ofstream(log_path, ios::app);
+			handler = new ofstream(l_path, ios::app);
 			file_handlers[log_path] = handler;
 		}
 		
 		if (handler) {
-			if (!handler->is_open()) handler->open(log_path);
+			if (!handler->is_open()) handler->open(l_path);
 			boost::tuple<boost::gregorian::date, boost::posix_time::time_duration> ts = timestamp();
 			boost::gregorian::date date = ts.get<0>();
 			boost::posix_time::time_duration time = ts.get<1>();
