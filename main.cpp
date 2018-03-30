@@ -1,12 +1,13 @@
 #include "SpiresHelper.h"
 
 namespace SpiresHelper {
-	map<char*, ofstream*> file_handlers;
+	map<std::string, ofstream*> file_handlers;
 
 	void CheckStack() {
 		if (file_handlers.size() > MAX_HANDLERS) {
-			file_handlers[0]->close();
-			file_handlers.erase(0);
+			ofstream *handler = file_handlers.begin()->second;
+			handler->close();
+			file_handlers.erase(file_handlers.begin());
 		}
 	}
 
@@ -18,9 +19,10 @@ namespace SpiresHelper {
 	}
 
 	void *LogText(int argc, char *args[]) {
-		char *log_path = args[0];
+		char *l_path = args[0];
 		char *log_string = args[1];
-		char *is_path = strchr(log_path, '/');
+		char *is_path = strchr(l_path, '/');
+		std::string log_path = l_path;
 		if (is_path != NULL) {
 			boost::filesystem::path log_path_no_file(log_path);
 			boost::filesystem::path dir = log_path_no_file.parent_path();
@@ -34,7 +36,7 @@ namespace SpiresHelper {
 			handler = new ofstream(log_path, ios::app);
 			file_handlers[log_path] = handler;
 		}
-		CheckStack();
+		
 		if (handler) {
 			if (!handler->is_open()) handler->open(log_path);
 			boost::tuple<boost::gregorian::date, boost::posix_time::time_duration> ts = timestamp();
@@ -42,20 +44,25 @@ namespace SpiresHelper {
 			boost::posix_time::time_duration time = ts.get<1>();
 			*handler << '[' << date << " " << time << ']' << '\n' << log_string << endl;
 		}
+		CheckStack();
 		return false;
 	}
 
 	void *Unregister(int argc, char *args[]) {
 		char *path = args[0];
-		if (file_handlers.find(path) != file_handlers.end()) {
-			file_handlers[path]->close();
-			file_handlers.erase(path);
+		std::map<std::string, ofstream*>::iterator it;
+
+		it = file_handlers.find(path);
+		if (it != file_handlers.end()) {
+			ofstream *handler = it->second;
+			handler->close();
+			file_handlers.erase(it);
 		}
 		return false;
 	}
 
 	void *UnregisterAll(int argc, char *args[]) {
-		for (map<char*, ofstream*>::iterator it = file_handlers.begin(); it != file_handlers.end(); ++it) {
+		for (map<std::string, ofstream*>::iterator it = file_handlers.begin(); it != file_handlers.end(); ++it) {
 			ofstream *handler = it->second;
 			handler->close();
 		}
