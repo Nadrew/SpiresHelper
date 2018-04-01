@@ -21,6 +21,9 @@ namespace SpiresHelper {
 	void *LogText(int argc, char *args[]) {
 		char *l_path = args[0];
 		char *log_string = args[1];
+		if (l_path == NULL || strlen(l_path) == 0) {
+			return false;
+		}
 		char *is_path = strchr(l_path, '/');
 		std::string log_path = l_path;
 		if (is_path != NULL) {
