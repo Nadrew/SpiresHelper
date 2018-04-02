@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#define MAX_HANDLERS 150
+#define MAX_HANDLERS 400
+
 #if defined(_MSC_VER)
 //  Windows 
 #define EXPORT __declspec(dllexport)
